@@ -1,5 +1,6 @@
-import React, { Component, Suspense } from 'react'
+import React, { Component, Suspense, useState } from 'react'
 import { HashRouter, Route, Routes } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 
 import './scss/style.scss'
 
@@ -14,22 +15,26 @@ const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
 
 // Pages
 const Login = React.lazy(() => import('./views/pages/login/Login'))
-const Page404 = React.lazy(() => import('./views/pages/page404/Page404'))
 
-class App extends Component {
-  render() {
-    return (
-      <HashRouter>
-        <Suspense fallback={loading}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/404" element={<Page404 />} />
-            <Route path="*" element={<DefaultLayout />} />
-          </Routes>
-        </Suspense>
-      </HashRouter>
-    )
+function App(): JSX.Element {
+  // States
+  const { client } = useSelector((state: any) => state.client)
+  const { jwt } = useSelector((state: any) => state.jwt)
+
+  function clientInitialized(): boolean {
+    return client !== '' && jwt !== ''
   }
+
+  return (
+    <HashRouter>
+      <Suspense fallback={loading}>
+        <Routes>
+          <Route path="*" element={clientInitialized() ? <DefaultLayout /> : <Login />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </Suspense>
+    </HashRouter>
+  )
 }
 
 export default App

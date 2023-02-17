@@ -22,9 +22,71 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilGlobeAlt, cilLockLocked, cilUser } from '@coreui/icons'
+import { useDispatch, useSelector } from 'react-redux'
+import { setClient, setJwt, setAdmin, readFromFile } from 'src/utils'
+import {
+  generateJwtMetaMask,
+  getUserConsentMM,
+  generateToken,
+  UserData,
+  Consent,
+  validateJwtAndPrivilege,
+} from 'src/lib'
 
 const Login = () => {
   const [visible, setVisible] = useState(false)
+  const [visibleMM, setVisibleMM] = useState(false)
+
+  const [address, setLocalAddress] = useState('')
+  const [localJwt, setLocalJwt] = useState('')
+  const [consentMM, setConsentMM] = useState({} as Consent)
+  const [localJwtMM, setLocalJwtMM] = useState('')
+
+  const { client } = useSelector((state: any) => state.client)
+  const dispatch = useDispatch()
+
+  async function loginWithJwt(jwt: string) {
+    await validateJwtAndPrivilege(client, jwt).then((status: string) => {
+      if (status !== 'invalid') {
+        dispatch(setJwt(jwt))
+        localStorage.setItem('jwt', jwt)
+        if (status === 'user') {
+          dispatch(setAdmin(false))
+          localStorage.setItem('isAdmin', 'false')
+        } else {
+          dispatch(setAdmin(true))
+          localStorage.setItem('isAdmin', 'true')
+        }
+      } else {
+        alert('Error: Invalid JWT or hostname.')
+      }
+    })
+  }
+
+  async function loginWithMetaMask() {
+    let consent: Consent = await getUserConsentMM(client, { authorization: '' })
+    await generateToken(client, '', consent)
+      .then((token: string) => {
+        loginWithJwt(token)
+      })
+      .catch(async (err: Error) => {
+        setConsentMM(consent)
+        setVisibleMM(true)
+      })
+  }
+
+  async function createMetaMask(jwt: string) {
+    await generateJwtMetaMask(client, jwt, consentMM)
+      .then((data: UserData) => {
+        loginWithJwt(data.userJwt)
+        setVisibleMM(false)
+        setVisible(false)
+      })
+      .catch((err: Error) => {
+        alert(err)
+      })
+  }
+
   return (
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
@@ -51,9 +113,18 @@ const Login = () => {
                         aria-label="Default select"
                         options={[
                           { label: '' },
-                          { label: 'https://test-1.colink-server.colearn.cloud/', value: '1' },
-                          { label: 'https://test-2.colink-server.colearn.cloud/', value: '2' },
+                          {
+                            label: 'https://test-1.colink-server.colearn.cloud/',
+                            value: 'https://test-1.colink-server.colearn.cloud/',
+                          },
+                          {
+                            label: 'https://test-2.colink-server.colearn.cloud/',
+                            value: 'https://test-2.colink-server.colearn.cloud/',
+                          },
                         ]}
+                        onChange={(e) => {
+                          setLocalAddress(e.target.value)
+                        }}
                       />
                     </CInputGroup>
                     <h4>Custom Address</h4>
@@ -61,58 +132,44 @@ const Login = () => {
                       <CInputGroupText>
                         <CIcon icon={cilGlobeAlt} />
                       </CInputGroupText>
-                      <CFormInput placeholder="Custom Address" autoComplete="username" />
+                      <CFormInput
+                        placeholder="Custom Address"
+                        onChange={(e) => {
+                          setLocalAddress(e.target.value)
+                        }}
+                      />
                     </CInputGroup>
                   </CForm>
                   <CButton
                     color="primary"
                     active
                     tabIndex={-1}
-                    onClick={() => setVisible(!visible)}
+                    onClick={() => {
+                      setVisible(!visible)
+                      dispatch(setClient(address))
+                      localStorage.setItem('address', address)
+                    }}
                   >
                     Connect
                   </CButton>
                 </CCardBody>
               </CCard>
-              {/* <CCard className="text-white bg-primary p-4" style={{ width: '44%' }}>
-                <CCardBody className="text-center">
-                  <div>
-                    <h2>Official Servers</h2>
-                    <p className="mt-3">
-                      Connect to one of our default CoLink servers from the dropdown menu!
-                    </p>
-                    <CFormSelect
-                      className="mx-auto mt-3"
-                      style={{ width: '75%' }}
-                      aria-label="Default select example"
-                      options={[
-                        '-- select server address --',
-                        { label: 'https://test-1.colink-server.colearn.cloud/', value: '1' },
-                        { label: 'https://test-2.colink-server.colearn.cloud/', value: '2' },
-                      ]}
-                    />
-                  </div>
-                  <CButton
-                    className="mt-3"
-                    active
-                    tabIndex={-1}
-                    onClick={() => setVisible(!visible)}
-                  >
-                    Connect
-                  </CButton>
-                </CCardBody>
-              </CCard> */}
             </CCardGroup>
           </CCol>
         </CRow>
       </CContainer>
 
-      <CModal size="xl" visible={visible} onClose={() => setVisible(false)} alignment="center">
+      <CModal
+        size="xl"
+        backdrop="static"
+        visible={visible}
+        onClose={() => setVisible(false)}
+        alignment="center"
+      >
         <CModalHeader>
-          <CModalTitle>Credentials</CModalTitle>
+          <CModalTitle>Specify your JWT or use Metamask to connect to the server.</CModalTitle>
         </CModalHeader>
         <CModalBody>
-          <p className="text-center">Specify your JWT or use Metamask to connect to the server.</p>
           <CCardGroup>
             <CCard className="p-4">
               <CCardBody className="text-center">
@@ -127,6 +184,9 @@ const Login = () => {
                       className="mx-auto"
                       type="file"
                       id="formFile"
+                      onChange={(e) => {
+                        readFromFile(e, setLocalJwt)
+                      }}
                     />
                   </div>
                   <CInputGroup className="mb-3">
@@ -134,10 +194,19 @@ const Login = () => {
                     <CFormTextarea
                       aria-label="text input"
                       style={{ resize: 'none', height: '150px' }}
+                      value={localJwt}
+                      onChange={(e) => {
+                        setLocalJwt(e.target.value)
+                      }}
                     ></CFormTextarea>
                   </CInputGroup>
                 </CForm>
-                <CButton color="primary" active tabIndex={-1} onClick={() => setVisible(!visible)}>
+                <CButton
+                  color="primary"
+                  active
+                  tabIndex={-1}
+                  onClick={() => loginWithJwt(localJwt)}
+                >
                   Confirm
                 </CButton>
               </CCardBody>
@@ -150,10 +219,72 @@ const Login = () => {
                     Connect your Metamask wallet using the button below. <br /> Note: if you have
                     not registered a Metamask account, you must provide an admin JWT to register it.
                   </p>
-                  <CButton active tabIndex={-1} onClick={() => setVisible(!visible)}>
+                  <CButton active tabIndex={-1} onClick={() => loginWithMetaMask()}>
                     Connect Wallet
                   </CButton>
                 </div>
+              </CCardBody>
+            </CCard>
+          </CCardGroup>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setVisible(false)}>
+            Close
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      <CModal
+        size="lg"
+        backdrop="static"
+        style={{ maxWidth: '75%', marginLeft: '12.5%' }}
+        visible={visibleMM}
+        onClose={() => setVisibleMM(false)}
+        alignment="center"
+      >
+        <CModalHeader>
+          <CModalTitle>Account not Registered</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <CCardGroup>
+            <CCard className="p-4">
+              <CCardBody className="text-center">
+                <CForm>
+                  <h2>JWT</h2>
+                  <p className="mt-3 text-medium-emphasis">
+                    Provide an admin JWT to register your new MetaMask account!
+                  </p>
+                  <div className="mb-3">
+                    <CFormInput
+                      style={{ width: '55%' }}
+                      className="mx-auto"
+                      type="file"
+                      id="formFile"
+                      onChange={(e) => {
+                        readFromFile(e, setLocalJwtMM)
+                      }}
+                    />
+                  </div>
+                  <CInputGroup className="mb-3">
+                    <CInputGroupText>JWT</CInputGroupText>
+                    <CFormTextarea
+                      aria-label="text input"
+                      style={{ resize: 'none', height: '100px' }}
+                      value={localJwtMM}
+                      onChange={(e) => {
+                        setLocalJwtMM(e.target.value)
+                      }}
+                    ></CFormTextarea>
+                  </CInputGroup>
+                </CForm>
+                <CButton
+                  color="primary"
+                  active
+                  tabIndex={-1}
+                  onClick={() => createMetaMask(localJwtMM)}
+                >
+                  Confirm
+                </CButton>
               </CCardBody>
             </CCard>
           </CCardGroup>
