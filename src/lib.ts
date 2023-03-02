@@ -32,6 +32,27 @@ function getClient(input: string | CoLinkClient): CoLinkClient {
   }
 }
 
+export async function verifyClient(input: string | CoLinkClient): Promise<boolean> {
+  let client: CoLinkClient
+  if (typeof input === 'string') {
+    client = new CoLinkClient(input)
+  } else {
+    client = input
+  }
+
+  let response: boolean = false
+  let coreReq: Empty = new Empty()
+  await client
+    .requestInfo(coreReq, getMetadata(''))
+    .then((resp: RequestInfoResponse) => {
+      response = true
+    })
+    .catch((err: Error) => {
+      response = false
+    })
+  return Promise.resolve(response)
+}
+
 function getMetadata(jwt: string): {} {
   // set metadata with admin token
   let meta = { authorization: jwt }

@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
+  CAlert,
   CButton,
   CCard,
   CCardBody,
   CCardGroup,
+  CCardHeader,
   CCol,
   CContainer,
   CForm,
@@ -31,12 +33,24 @@ import {
   UserData,
   Consent,
   validateJwtAndPrivilege,
+  verifyClient,
 } from 'src/lib'
 
 const Login = () => {
-  const [visible, setVisible] = useState(false)
+  // Disables custom URLs if default selected
+  const [isDefault, setDefault] = useState(false)
+
+  // Panel to configure JWT
+  const [visibleJwt, setVisibleJwt] = useState(false)
+
+  // For getting admin JWT on initial MetaMask request
   const [visibleMM, setVisibleMM] = useState(false)
 
+  // Toggle loading panel
+  const [visibleLoad, setVisibleLoad] = useState(false)
+  const [errorState, setErrorState] = useState(false)
+
+  // Temp value storage (before commiting to local storage)
   const [address, setLocalAddress] = useState('')
   const [localJwt, setLocalJwt] = useState('')
   const [consentMM, setConsentMM] = useState({} as Consent)
@@ -80,7 +94,7 @@ const Login = () => {
       .then((data: UserData) => {
         loginWithJwt(data.userJwt)
         setVisibleMM(false)
-        setVisible(false)
+        setVisibleJwt(false)
       })
       .catch((err: Error) => {
         alert(err)
@@ -92,78 +106,158 @@ const Login = () => {
       <CContainer>
         <CRow className="justify-content-center">
           <CCol md={5}>
-            <CCardGroup>
-              <CCard className="p-4">
-                <CCardBody className="text-center">
-                  <CForm>
-                    <h1 className="mb-3">Welcome to CoLink</h1>
-                    <p className="text-medium-emphasis mb-3">
-                      Connect to one of our default CoLink servers, or specify your own address
-                      below!
-                    </p>
-                    <hr />
-                    <h4>Official Servers</h4>
-                    <CInputGroup className="mb-3" style={{ width: '80%', marginLeft: '10%' }}>
-                      <CInputGroupText>
-                        <CIcon icon={cilGlobeAlt} />
-                      </CInputGroupText>
-                      <CFormSelect
-                        className="mx-auto"
-                        style={{ width: '80%' }}
-                        aria-label="Default select"
-                        options={[
-                          { label: '' },
-                          {
-                            label: 'https://test-1.colink-server.colearn.cloud/',
-                            value: 'https://test-1.colink-server.colearn.cloud/',
-                          },
-                          {
-                            label: 'https://test-2.colink-server.colearn.cloud/',
-                            value: 'https://test-2.colink-server.colearn.cloud/',
-                          },
-                        ]}
-                        onChange={(e) => {
-                          setLocalAddress(e.target.value)
-                        }}
-                      />
-                    </CInputGroup>
-                    <h4>Custom Address</h4>
-                    <CInputGroup className="mb-3" style={{ width: '80%', marginLeft: '10%' }}>
-                      <CInputGroupText>
-                        <CIcon icon={cilGlobeAlt} />
-                      </CInputGroupText>
-                      <CFormInput
-                        placeholder="Custom Address"
-                        onChange={(e) => {
-                          setLocalAddress(e.target.value)
-                        }}
-                      />
-                    </CInputGroup>
-                  </CForm>
-                  <CButton
-                    color="primary"
-                    active
-                    tabIndex={-1}
-                    onClick={() => {
-                      setVisible(!visible)
+            <CCard>
+              <CCardHeader className="text-center p-4">
+                <h1>CoLink Login</h1>
+              </CCardHeader>
+              <CCardBody className="text-center p-4">
+                <CForm>
+                  <h4>Official Server</h4>
+                  <p className="text-medium-emphasis mb-3" style={{ fontSize: '18px' }}>
+                    Connect to an official CoLink server from the list of servers below:
+                  </p>
+                  <CInputGroup className="mb-4" style={{ width: '80%', marginLeft: '10%' }}>
+                    <CInputGroupText>
+                      <CIcon icon={cilGlobeAlt} />
+                    </CInputGroupText>
+                    <CFormSelect
+                      className="mx-auto"
+                      style={{ width: '80%' }}
+                      aria-label="Default select"
+                      options={[
+                        { label: '', value: '' },
+                        {
+                          label: 'https://test-1.colink-server.colearn.cloud/',
+                          value: 'https://test-1.colink-server.colearn.cloud/',
+                        },
+                        {
+                          label: 'https://test-2.colink-server.colearn.cloud/',
+                          value: 'https://test-2.colink-server.colearn.cloud/',
+                        },
+                      ]}
+                      onChange={(e) => {
+                        setLocalAddress(e.target.value)
+                        if (e.target.value !== '') {
+                          setDefault(true)
+                        } else {
+                          setDefault(false)
+                        }
+                      }}
+                    />
+                  </CInputGroup>
+                  <div className="d-flex justify-content-center mb-2">
+                    <div
+                      style={{
+                        width: '100%',
+                        textAlign: 'center',
+                        borderBottom: '1px solid lightgray',
+                        lineHeight: '0.1em',
+                        margin: '10px 0 20px',
+                      }}
+                    >
+                      <span style={{ background: '#fff', padding: '0 15px' }}>OR</span>
+                    </div>
+                  </div>
+                  <h4>Custom Server</h4>
+                  <p className="text-medium-emphasis mb-3" style={{ fontSize: '18px' }}>
+                    Specify a custom CoLink server address to connect to:
+                  </p>
+                  <CInputGroup className="mb-3" style={{ width: '80%', marginLeft: '10%' }}>
+                    <CInputGroupText>
+                      <CIcon icon={cilGlobeAlt} />
+                    </CInputGroupText>
+                    <CFormInput
+                      disabled={isDefault}
+                      placeholder="Custom Address"
+                      onChange={(e) => {
+                        setLocalAddress(e.target.value)
+                      }}
+                    />
+                  </CInputGroup>
+                </CForm>
+                <CButton
+                  color="primary"
+                  active
+                  tabIndex={-1}
+                  onClick={async () => {
+                    setErrorState(false)
+                    setVisibleLoad(true)
+                    if (await verifyClient(address)) {
+                      setVisibleLoad(false)
+                      setVisibleJwt(true)
                       dispatch(setClient(address))
                       localStorage.setItem('address', address)
-                    }}
-                  >
-                    Connect
-                  </CButton>
-                </CCardBody>
-              </CCard>
-            </CCardGroup>
+                    } else {
+                      setErrorState(true)
+                    }
+                  }}
+                >
+                  Connect
+                </CButton>
+              </CCardBody>
+            </CCard>
           </CCol>
         </CRow>
       </CContainer>
 
+      {/* Display error message if client invalid */}
+      <CModal
+        backdrop="static"
+        visible={visibleLoad}
+        onClose={() => setVisibleLoad(false)}
+        alignment="center"
+      >
+        <CModalBody>
+          <CCardGroup>
+            <CCard className="p-2">
+              <CCardBody className="text-center">
+                {errorState ? (
+                  <>
+                    <p className="text-medium-emphasis mb-3" style={{ fontSize: '18px' }}>
+                      Error connecting to the server. Please specify a different address.
+                    </p>
+                    <CButton
+                      color="primary"
+                      active
+                      tabIndex={-1}
+                      onClick={() => {
+                        setVisibleLoad(false)
+                        setErrorState(false)
+                        setLocalAddress('')
+                      }}
+                    >
+                      Close
+                    </CButton>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-medium-emphasis mb-3" style={{ fontSize: '18px' }}>
+                      Connecting to server...
+                    </p>
+                    <CButton
+                      color="primary"
+                      active
+                      tabIndex={-1}
+                      onClick={() => {
+                        setVisibleLoad(false)
+                      }}
+                    >
+                      Cancel
+                    </CButton>
+                  </>
+                )}
+              </CCardBody>
+            </CCard>
+          </CCardGroup>
+        </CModalBody>
+      </CModal>
+
+      {/* Get JWT/Metamask info with valid client */}
       <CModal
         size="xl"
         backdrop="static"
-        visible={visible}
-        onClose={() => setVisible(false)}
+        visible={visibleJwt}
+        onClose={() => setVisibleJwt(false)}
         alignment="center"
       >
         <CModalHeader>
@@ -228,7 +322,7 @@ const Login = () => {
           </CCardGroup>
         </CModalBody>
         <CModalFooter>
-          <CButton color="secondary" onClick={() => setVisible(false)}>
+          <CButton color="secondary" onClick={() => setVisibleJwt(false)}>
             Close
           </CButton>
         </CModalFooter>
@@ -290,7 +384,7 @@ const Login = () => {
           </CCardGroup>
         </CModalBody>
         <CModalFooter>
-          <CButton color="secondary" onClick={() => setVisible(false)}>
+          <CButton color="secondary" onClick={() => setVisibleJwt(false)}>
             Close
           </CButton>
         </CModalFooter>
