@@ -337,7 +337,7 @@ const Login = () => {
         alignment="center"
       >
         <CModalHeader>
-          <CModalTitle>Account not Registered</CModalTitle>
+          <CModalTitle>Account not registered</CModalTitle>
         </CModalHeader>
         <CModalBody>
           <CCardGroup>
@@ -346,7 +346,7 @@ const Login = () => {
                 <CForm>
                   <h2>JWT</h2>
                   <p className="mt-3 text-medium-emphasis">
-                    Provide an admin JWT to register your new MetaMask account!
+                    Provide an admin JWT to register your MetaMask account on this CoLink server!
                   </p>
                   <div className="mb-3">
                     <CFormInput
