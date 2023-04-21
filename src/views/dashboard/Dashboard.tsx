@@ -13,6 +13,11 @@ import {
   CModalHeader,
   CModalTitle,
   CRow,
+  CNav,
+  CNavItem,
+  CNavLink,
+  CTabContent,
+  CTabPane,
 } from '@coreui/react'
 
 import {
@@ -63,6 +68,7 @@ const getNewFiles = async (path: string, getFiles: Function): Promise<FileArray>
         name: lastKeyNameFromPath(key),
         isDir: isDirectory(key),
         isHidden: false,
+        ext: '',
       }
       return entry
     })
@@ -123,17 +129,17 @@ export const useFileActionHandler = (setPath: Function, displayEntry: Function) 
   )
 }
 
-const test = defineFileAction({
-  id: 'testPrint',
-  requiresSelection: true,
-  button: {
-    name: 'Test',
-    toolbar: true,
-    group: 'Options',
-  },
-})
+// const test = defineFileAction({
+//   id: 'testPrint',
+//   requiresSelection: true,
+//   button: {
+//     name: 'Test',
+//     toolbar: true,
+//     group: 'Options',
+//   },
+// })
 
-const myFileActions = [test]
+// const myFileActions = [test]
 
 const ReadOnlyVFSBrowser: React.FC<{
   instanceId: string
@@ -168,7 +174,7 @@ const ReadOnlyVFSBrowser: React.FC<{
       <FileBrowser
         instanceId={props.instanceId}
         files={files}
-        fileActions={myFileActions}
+        // fileActions={myFileActions}
         folderChain={folderChain}
         onFileAction={handleFileAction}
         thumbnailGenerator={(file: FileData) => null}
@@ -194,7 +200,7 @@ const Dashboard: React.FC = () => {
   const defEmpty = new StorageEntry()
   const [entry, updateDisplay] = useState(defEmpty)
   const [visible, updateVisible] = useState(false)
-  const [isString, updateB64] = useState(true)
+  const [displayTab, updateTab] = useState(1)
 
   async function getKeysAtPrefix(prefix: string) {
     let paths: string[] = []
@@ -233,9 +239,9 @@ const Dashboard: React.FC = () => {
         <CCardBody>
           <CRow>
             <CCol sm={5}>
-              <h4 id="traffic" className="card-title mb-0">
+              <h3 id="traffic" className="card-title mb-0">
                 Storage Entries
-              </h4>
+              </h3>
             </CCol>
           </CRow>
         </CCardBody>
@@ -265,7 +271,23 @@ const Dashboard: React.FC = () => {
         </CModalHeader>
         <CModalBody>
           <CCardGroup>
-            <CCard></CCard>
+            <CNav variant="tabs" role="tablist">
+              <CNavItem>
+                <CNavLink active={displayTab === 1} onClick={() => updateTab(1)}>
+                  Binary
+                </CNavLink>
+              </CNavItem>
+              <CNavItem>
+                <CNavLink active={displayTab === 2} onClick={() => updateTab(2)}>
+                  Base64
+                </CNavLink>
+              </CNavItem>
+              <CNavItem>
+                <CNavLink active={displayTab === 3} onClick={() => updateTab(3)}>
+                  String
+                </CNavLink>
+              </CNavItem>
+            </CNav>
           </CCardGroup>
           <CCardGroup>
             <CCard className="p-2">
@@ -278,18 +300,19 @@ const Dashboard: React.FC = () => {
                     width: '100%',
                   }}
                 >
-                  {visible ? JSON.stringify(storageEntryToJSON(entry, isString), null, 2) : ''}
+                  {visible ? JSON.stringify(storageEntryToJSON(entry, displayTab), null, 2) : ''}
                 </div>
-                <CButton className="ms-2" active tabIndex={-1} color="info">
+                <CButton className="ms-2" active tabIndex={-1} color="light">
                   <a
                     download="payload.txt"
                     href={
                       visible
                         ? createDownloadHref(
-                            JSON.stringify(storageEntryToJSON(entry, isString), null, 2),
+                            JSON.stringify(storageEntryToJSON(entry, displayTab), null, 2),
                           )
                         : '#'
                     }
+                    style={{ textDecoration: 'none', color: 'black' }}
                   >
                     Download Entry
                   </a>

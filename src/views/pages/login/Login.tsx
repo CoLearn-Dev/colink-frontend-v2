@@ -86,6 +86,7 @@ const Login = () => {
       .catch(async (err: Error) => {
         setConsentMM(consent)
         setVisibleMM(true)
+        setVisibleJwt(false)
       })
   }
 
@@ -111,7 +112,21 @@ const Login = () => {
                 <h1>CoLink Login</h1>
               </CCardHeader>
               <CCardBody className="text-center p-4">
-                <CForm>
+                <CForm
+                  onSubmit={async (e) => {
+                    e.preventDefault()
+                    setErrorState(false)
+                    setVisibleLoad(true)
+                    if (await verifyClient(address)) {
+                      setVisibleLoad(false)
+                      setVisibleJwt(true)
+                      dispatch(setClient(address))
+                      localStorage.setItem('address', address)
+                    } else {
+                      setErrorState(true)
+                    }
+                  }}
+                >
                   <h4>Official Server</h4>
                   <p className="text-medium-emphasis mb-3" style={{ fontSize: '18px' }}>
                     Connect to an official CoLink server from the list of servers below:
@@ -174,26 +189,10 @@ const Login = () => {
                       }}
                     />
                   </CInputGroup>
+                  <CButton color="primary" active tabIndex={-1} type="submit">
+                    Connect
+                  </CButton>
                 </CForm>
-                <CButton
-                  color="primary"
-                  active
-                  tabIndex={-1}
-                  onClick={async () => {
-                    setErrorState(false)
-                    setVisibleLoad(true)
-                    if (await verifyClient(address)) {
-                      setVisibleLoad(false)
-                      setVisibleJwt(true)
-                      dispatch(setClient(address))
-                      localStorage.setItem('address', address)
-                    } else {
-                      setErrorState(true)
-                    }
-                  }}
-                >
-                  Connect
-                </CButton>
               </CCardBody>
             </CCard>
           </CCol>
@@ -212,39 +211,33 @@ const Login = () => {
             <CCard className="p-2">
               <CCardBody className="text-center">
                 {errorState ? (
-                  <>
+                  <CForm
+                    onSubmit={() => {
+                      setErrorState(false)
+                      setLocalAddress('')
+                      setVisibleLoad(false)
+                    }}
+                  >
                     <p className="text-medium-emphasis mb-3" style={{ fontSize: '18px' }}>
                       Error connecting to the server. Please specify a different address.
                     </p>
-                    <CButton
-                      color="primary"
-                      active
-                      tabIndex={-1}
-                      onClick={() => {
-                        setVisibleLoad(false)
-                        setErrorState(false)
-                        setLocalAddress('')
-                      }}
-                    >
+                    <CButton color="primary" active tabIndex={-1} type="submit">
                       Close
                     </CButton>
-                  </>
+                  </CForm>
                 ) : (
-                  <>
+                  <CForm
+                    onSubmit={() => {
+                      setVisibleLoad(false)
+                    }}
+                  >
                     <p className="text-medium-emphasis mb-3" style={{ fontSize: '18px' }}>
                       Connecting to server...
                     </p>
-                    <CButton
-                      color="primary"
-                      active
-                      tabIndex={-1}
-                      onClick={() => {
-                        setVisibleLoad(false)
-                      }}
-                    >
+                    <CButton color="primary" active tabIndex={-1} type="submit">
                       Cancel
                     </CButton>
-                  </>
+                  </CForm>
                 )}
               </CCardBody>
             </CCard>
@@ -337,7 +330,7 @@ const Login = () => {
         alignment="center"
       >
         <CModalHeader>
-          <CModalTitle>Account not Registered</CModalTitle>
+          <CModalTitle>Account not registered</CModalTitle>
         </CModalHeader>
         <CModalBody>
           <CCardGroup>
@@ -346,7 +339,7 @@ const Login = () => {
                 <CForm>
                   <h2>JWT</h2>
                   <p className="mt-3 text-medium-emphasis">
-                    Provide an admin JWT to register your new MetaMask account!
+                    Provide an admin JWT to register your MetaMask account on this CoLink server!
                   </p>
                   <div className="mb-3">
                     <CFormInput
@@ -384,7 +377,13 @@ const Login = () => {
           </CCardGroup>
         </CModalBody>
         <CModalFooter>
-          <CButton color="secondary" onClick={() => setVisibleJwt(false)}>
+          <CButton
+            color="secondary"
+            onClick={() => {
+              setVisibleMM(false)
+              setVisibleJwt(true)
+            }}
+          >
             Close
           </CButton>
         </CModalFooter>

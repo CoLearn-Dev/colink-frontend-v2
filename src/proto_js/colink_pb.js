@@ -33,6 +33,7 @@ goog.exportSymbol('proto.colink.ProtocolOperatorInstanceId', null, global);
 goog.exportSymbol('proto.colink.ReadKeysRequest', null, global);
 goog.exportSymbol('proto.colink.RequestInfoResponse', null, global);
 goog.exportSymbol('proto.colink.StartProtocolOperatorRequest', null, global);
+goog.exportSymbol('proto.colink.StartProtocolOperatorSourceType', null, global);
 goog.exportSymbol('proto.colink.StorageEntries', null, global);
 goog.exportSymbol('proto.colink.StorageEntry', null, global);
 goog.exportSymbol('proto.colink.SubscribeRequest', null, global);
@@ -4836,7 +4837,11 @@ proto.colink.StartProtocolOperatorRequest.toObject = function(includeInstance, m
   var f, obj = {
     protocolName: jspb.Message.getFieldWithDefault(msg, 1, ""),
     userId: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    upgrade: jspb.Message.getBooleanFieldWithDefault(msg, 3, false)
+    upgrade: jspb.Message.getBooleanFieldWithDefault(msg, 3, false),
+    sourceType: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    deployMode: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    source: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    vtPublicAddr: jspb.Message.getFieldWithDefault(msg, 7, "")
   };
 
   if (includeInstance) {
@@ -4885,6 +4890,22 @@ proto.colink.StartProtocolOperatorRequest.deserializeBinaryFromReader = function
       var value = /** @type {boolean} */ (reader.readBool());
       msg.setUpgrade(value);
       break;
+    case 4:
+      var value = /** @type {!proto.colink.StartProtocolOperatorSourceType} */ (reader.readEnum());
+      msg.setSourceType(value);
+      break;
+    case 5:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setDeployMode(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSource(value);
+      break;
+    case 7:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setVtPublicAddr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -4932,6 +4953,34 @@ proto.colink.StartProtocolOperatorRequest.serializeBinaryToWriter = function(mes
   if (f) {
     writer.writeBool(
       3,
+      f
+    );
+  }
+  f = message.getSourceType();
+  if (f !== 0.0) {
+    writer.writeEnum(
+      4,
+      f
+    );
+  }
+  f = message.getDeployMode();
+  if (f.length > 0) {
+    writer.writeString(
+      5,
+      f
+    );
+  }
+  f = message.getSource();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
+  }
+  f = message.getVtPublicAddr();
+  if (f.length > 0) {
+    writer.writeString(
+      7,
       f
     );
   }
@@ -4989,6 +5038,78 @@ proto.colink.StartProtocolOperatorRequest.prototype.getUpgrade = function() {
  */
 proto.colink.StartProtocolOperatorRequest.prototype.setUpgrade = function(value) {
   return jspb.Message.setProto3BooleanField(this, 3, value);
+};
+
+
+/**
+ * optional StartProtocolOperatorSourceType source_type = 4;
+ * @return {!proto.colink.StartProtocolOperatorSourceType}
+ */
+proto.colink.StartProtocolOperatorRequest.prototype.getSourceType = function() {
+  return /** @type {!proto.colink.StartProtocolOperatorSourceType} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
+};
+
+
+/**
+ * @param {!proto.colink.StartProtocolOperatorSourceType} value
+ * @return {!proto.colink.StartProtocolOperatorRequest} returns this
+ */
+proto.colink.StartProtocolOperatorRequest.prototype.setSourceType = function(value) {
+  return jspb.Message.setProto3EnumField(this, 4, value);
+};
+
+
+/**
+ * optional string deploy_mode = 5;
+ * @return {string}
+ */
+proto.colink.StartProtocolOperatorRequest.prototype.getDeployMode = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.colink.StartProtocolOperatorRequest} returns this
+ */
+proto.colink.StartProtocolOperatorRequest.prototype.setDeployMode = function(value) {
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional string source = 6;
+ * @return {string}
+ */
+proto.colink.StartProtocolOperatorRequest.prototype.getSource = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.colink.StartProtocolOperatorRequest} returns this
+ */
+proto.colink.StartProtocolOperatorRequest.prototype.setSource = function(value) {
+  return jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * optional string vt_public_addr = 7;
+ * @return {string}
+ */
+proto.colink.StartProtocolOperatorRequest.prototype.getVtPublicAddr = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.colink.StartProtocolOperatorRequest} returns this
+ */
+proto.colink.StartProtocolOperatorRequest.prototype.setVtPublicAddr = function(value) {
+  return jspb.Message.setProto3StringField(this, 7, value);
 };
 
 
@@ -5121,5 +5242,15 @@ proto.colink.ProtocolOperatorInstanceId.prototype.setInstanceId = function(value
   return jspb.Message.setProto3StringField(this, 1, value);
 };
 
+
+/**
+ * @enum {number}
+ */
+proto.colink.StartProtocolOperatorSourceType = {
+  NONE: 0,
+  TGZ: 1,
+  GIT: 2,
+  DOCKER: 3
+};
 
 goog.object.extend(exports, proto.colink);

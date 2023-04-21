@@ -435,7 +435,8 @@ proto.colink_registry.UserRecord.toObject = function(includeInstance, msg) {
   var f, obj = {
     userId: jspb.Message.getFieldWithDefault(msg, 1, ""),
     coreAddr: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    guestJwt: jspb.Message.getFieldWithDefault(msg, 3, "")
+    guestJwt: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    forwardingUserId: jspb.Message.getFieldWithDefault(msg, 4, "")
   };
 
   if (includeInstance) {
@@ -484,6 +485,10 @@ proto.colink_registry.UserRecord.deserializeBinaryFromReader = function(msg, rea
       var value = /** @type {string} */ (reader.readString());
       msg.setGuestJwt(value);
       break;
+    case 4:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setForwardingUserId(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -531,6 +536,13 @@ proto.colink_registry.UserRecord.serializeBinaryToWriter = function(message, wri
   if (f.length > 0) {
     writer.writeString(
       3,
+      f
+    );
+  }
+  f = message.getForwardingUserId();
+  if (f.length > 0) {
+    writer.writeString(
+      4,
       f
     );
   }
@@ -588,6 +600,24 @@ proto.colink_registry.UserRecord.prototype.getGuestJwt = function() {
  */
 proto.colink_registry.UserRecord.prototype.setGuestJwt = function(value) {
   return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
+/**
+ * optional string forwarding_user_id = 4;
+ * @return {string}
+ */
+proto.colink_registry.UserRecord.prototype.getForwardingUserId = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.colink_registry.UserRecord} returns this
+ */
+proto.colink_registry.UserRecord.prototype.setForwardingUserId = function(value) {
+  return jspb.Message.setProto3StringField(this, 4, value);
 };
 
 

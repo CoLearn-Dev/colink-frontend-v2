@@ -564,6 +564,18 @@ export class StartProtocolOperatorRequest extends jspb.Message {
   getUpgrade(): boolean;
   setUpgrade(value: boolean): StartProtocolOperatorRequest;
 
+  getSourceType(): StartProtocolOperatorSourceType;
+  setSourceType(value: StartProtocolOperatorSourceType): StartProtocolOperatorRequest;
+
+  getDeployMode(): string;
+  setDeployMode(value: string): StartProtocolOperatorRequest;
+
+  getSource(): string;
+  setSource(value: string): StartProtocolOperatorRequest;
+
+  getVtPublicAddr(): string;
+  setVtPublicAddr(value: string): StartProtocolOperatorRequest;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): StartProtocolOperatorRequest.AsObject;
   static toObject(includeInstance: boolean, msg: StartProtocolOperatorRequest): StartProtocolOperatorRequest.AsObject;
@@ -577,6 +589,10 @@ export namespace StartProtocolOperatorRequest {
     protocolName: string,
     userId: string,
     upgrade: boolean,
+    sourceType: StartProtocolOperatorSourceType,
+    deployMode: string,
+    source: string,
+    vtPublicAddr: string,
   }
 }
 
@@ -598,3 +614,9 @@ export namespace ProtocolOperatorInstanceId {
   }
 }
 
+export enum StartProtocolOperatorSourceType { 
+  NONE = 0,
+  TGZ = 1,
+  GIT = 2,
+  DOCKER = 3,
+}

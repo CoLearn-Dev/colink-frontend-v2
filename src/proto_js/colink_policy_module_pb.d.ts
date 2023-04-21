@@ -12,8 +12,10 @@ export class Rule extends jspb.Message {
   hasTaskFilter(): boolean;
   clearTaskFilter(): Rule;
 
-  getAction(): string;
-  setAction(value: string): Rule;
+  getAction(): Action | undefined;
+  setAction(value?: Action): Rule;
+  hasAction(): boolean;
+  clearAction(): Rule;
 
   getPriority(): number;
   setPriority(value: number): Rule;
@@ -30,7 +32,7 @@ export namespace Rule {
   export type AsObject = {
     ruleId: string,
     taskFilter?: TaskFilter.AsObject,
-    action: string,
+    action?: Action.AsObject,
     priority: number,
   }
 }
@@ -76,6 +78,28 @@ export namespace TaskFilter {
     role: string,
     parentTaskFilter?: TaskFilter.AsObject,
     requireAgreement?: google_protobuf_wrappers_pb.BoolValue.AsObject,
+  }
+}
+
+export class Action extends jspb.Message {
+  getType(): string;
+  setType(value: string): Action;
+
+  getForwardTargetKeyname(): string;
+  setForwardTargetKeyname(value: string): Action;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Action.AsObject;
+  static toObject(includeInstance: boolean, msg: Action): Action.AsObject;
+  static serializeBinaryToWriter(message: Action, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Action;
+  static deserializeBinaryFromReader(message: Action, reader: jspb.BinaryReader): Action;
+}
+
+export namespace Action {
+  export type AsObject = {
+    type: string,
+    forwardTargetKeyname: string,
   }
 }
 

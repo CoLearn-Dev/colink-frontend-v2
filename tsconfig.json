@@ -16,7 +16,7 @@
   },
   "include": [
     "src",
-    "./declarations.d.ts",
+    "./declarations.d.ts", "config-overrides.js",
   ],
   "exclude": [
     "node_modules"

@@ -13,9 +13,9 @@ import {
 import { CoLinkClient } from './proto_js/ColinkServiceClientPb'
 import secp256k1 from 'secp256k1'
 import { Buffer } from 'buffer'
-import crypto from 'crypto'
 import { ethers } from 'ethers'
 import { Metadata } from 'grpc-web'
+import crypto from 'crypto'
 
 // Required for grpc-web on SSR
 global.XMLHttpRequest = require('xhr2')
@@ -69,7 +69,7 @@ function getNameEntry(input: string | StorageEntry): StorageEntry {
   }
 }
 
-function getUserId(jwt: string): string {
+export function getUserId(jwt: string): string {
   let encodedId: string = jwt.split('.')[1]
   let userId: string = JSON.parse(Buffer.from(encodedId, 'base64').toString()).user_id
   return userId
@@ -192,6 +192,7 @@ export async function generateKeyAndJwt(
   hostToken: string,
   expirationTimestamp?: number,
 ): Promise<UserData> {
+  console.log(crypto)
   let privateKey: string = Buffer.from(crypto.randomBytes(32)).toString('hex')
   return generateJwtFromKey(address, privateKey, hostToken, expirationTimestamp)
 }
@@ -323,13 +324,23 @@ export function daysToTimestamp(days: number) {
 }
 
 /* Handles STORAGE OPERATIONS (read, write, update, etc.) */
-export function storageEntryToJSON(entry: StorageEntry, isString: boolean) {
+export function storageEntryToJSON(entry: StorageEntry, displayTab: number) {
+  // 1: Binary
+  // 2: Base64
+  // 3: String
+  // 4: JSON
+
   let payload: string
-  if (isString) {
-    payload = new TextDecoder().decode(entry.getPayload_asU8())
+  if (displayTab === 1) {
+    payload = entry
+      .getPayload_asU8()
+      .reduce((str, byte) => str + byte.toString(2).padStart(8, '0'), '')
+  } else if (displayTab === 2) {
+    payload = entry.getPayload_asB64()
   } else {
     payload = i2hex(entry.getPayload_asU8())
   }
+
   return {
     name: keyNameFromPath(entry.getKeyPath()),
     keyPath: entry.getKeyPath(),

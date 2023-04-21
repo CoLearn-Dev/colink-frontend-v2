@@ -54,6 +54,9 @@ export class UserRecord extends jspb.Message {
   getGuestJwt(): string;
   setGuestJwt(value: string): UserRecord;
 
+  getForwardingUserId(): string;
+  setForwardingUserId(value: string): UserRecord;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): UserRecord.AsObject;
   static toObject(includeInstance: boolean, msg: UserRecord): UserRecord.AsObject;
@@ -67,6 +70,7 @@ export namespace UserRecord {
     userId: string,
     coreAddr: string,
     guestJwt: string,
+    forwardingUserId: string,
   }
 }
 
