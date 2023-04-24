@@ -106,7 +106,7 @@ const Login = () => {
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
         <CRow className="justify-content-center">
-          <CCol md={5}>
+          <CCol md={6}>
             <CCard>
               <CCardHeader className="text-center p-4">
                 <h1>CoLink Login</h1>
@@ -140,19 +140,19 @@ const Login = () => {
                       style={{ width: '80%' }}
                       aria-label="Default select"
                       options={[
-                        { label: '', value: '' },
+                        { label: 'Custom Server (configure below)', value: ' ' },
                         {
-                          label: 'https://test-1.colink-server.colearn.cloud/',
-                          value: 'https://test-1.colink-server.colearn.cloud/',
+                          label: 'test-0 (https://test-0.colink-server.colearn.cloud)',
+                          value: 'https://test-0.colink-server.colearn.cloud',
                         },
                         {
-                          label: 'https://test-2.colink-server.colearn.cloud/',
-                          value: 'https://test-2.colink-server.colearn.cloud/',
+                          label: 'test-1 (https://test-1.colink-server.colearn.cloud)',
+                          value: 'https://test-1.colink-server.colearn.cloud',
                         },
                       ]}
                       onChange={(e) => {
                         setLocalAddress(e.target.value)
-                        if (e.target.value !== '') {
+                        if (e.target.value !== ' ') {
                           setDefault(true)
                         } else {
                           setDefault(false)
