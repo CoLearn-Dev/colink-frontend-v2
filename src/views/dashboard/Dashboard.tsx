@@ -200,7 +200,7 @@ const Dashboard: React.FC = () => {
   const defEmpty = new StorageEntry()
   const [entry, updateDisplay] = useState(defEmpty)
   const [visible, updateVisible] = useState(false)
-  const [displayTab, updateTab] = useState(1)
+  const [displayTab, updateTab] = useState(3)
 
   async function getKeysAtPrefix(prefix: string) {
     let paths: string[] = []
@@ -272,11 +272,11 @@ const Dashboard: React.FC = () => {
         <CModalBody>
           <CCardGroup>
             <CNav variant="tabs" role="tablist">
-              <CNavItem>
+              {/* <CNavItem>
                 <CNavLink active={displayTab === 1} onClick={() => updateTab(1)}>
                   Binary
                 </CNavLink>
-              </CNavItem>
+              </CNavItem> */}
               <CNavItem>
                 <CNavLink active={displayTab === 2} onClick={() => updateTab(2)}>
                   Base64

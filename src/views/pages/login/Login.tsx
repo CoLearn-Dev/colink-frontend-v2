@@ -149,6 +149,10 @@ const Login = () => {
                           label: 'test-1 (https://test-1.colink-server.colearn.cloud)',
                           value: 'https://test-1.colink-server.colearn.cloud',
                         },
+                        {
+                          label: 'test-2 (https://test-2.colink-server.colearn.cloud)',
+                          value: 'https://test-2.colink-server.colearn.cloud',
+                        },
                       ]}
                       onChange={(e) => {
                         setLocalAddress(e.target.value)

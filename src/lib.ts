@@ -338,7 +338,11 @@ export function storageEntryToJSON(entry: StorageEntry, displayTab: number) {
   } else if (displayTab === 2) {
     payload = entry.getPayload_asB64()
   } else {
-    payload = i2hex(entry.getPayload_asU8())
+    try {
+      payload = atob(entry.getPayload_asB64())
+    } catch {
+      payload = 'unsupported'
+    }
   }
 
   return {
